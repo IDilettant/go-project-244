@@ -6,7 +6,25 @@ import (
 
 	"github.com/urfave/cli/v3"
 
+	"code"
+	"code/internal/formatter"
+	"code/internal/formatter/stylish"
 	"code/internal/parser"
+)
+
+const (
+	exitCodeUsageError   = 2
+	exitCodeRuntimeError = 1
+)
+
+const (
+	formatFlag = "format"
+	emptyFlag  = ""
+)
+
+const (
+	defaultFormat          = formatter.FormatStylish
+	requiredArgumentsCount = 2
 )
 
 func New() *cli.Command {
@@ -16,35 +34,59 @@ func New() *cli.Command {
 		ArgsUsage: "<filepath1> <filepath2>",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:    "format",
+				Name:    formatFlag,
 				Aliases: []string{"f"},
-				Value:   "stylish",
+				Value:   defaultFormat,
 				Usage:   "output format",
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			if cmd.Args().Len() != 2 {
+			if cmd.Args().Len() != requiredArgumentsCount {
 				_ = cli.ShowRootCommandHelp(cmd)
 
-				return cli.Exit("\nexpected 2 arguments: <filepath1> <filepath2>", 2)
+				return cli.Exit(
+					fmt.Sprintf(
+						"\nexpected %d arguments: <filepath1> <filepath2>",
+						requiredArgumentsCount,
+					),
+					exitCodeUsageError,
+				)
 			}
 
-			filepath1 := cmd.Args().Get(0)
-			filepath2 := cmd.Args().Get(1)
+			firstFilepath := cmd.Args().Get(0)
+			secondFilepath := cmd.Args().Get(1)
 
-			file1, err := parser.ParseFile(filepath1)
+			outputFormat := cmd.String(formatFlag)
+
+			leftNode, err := parser.ParseFile(firstFilepath)
 			if err != nil {
-				return cli.Exit(err.Error(), 1)
+				return cli.Exit(err.Error(), exitCodeRuntimeError)
 			}
 
-			file2, err := parser.ParseFile(filepath2)
+			rightNode, err := parser.ParseFile(secondFilepath)
 			if err != nil {
-				return cli.Exit(err.Error(), 1)
+				return cli.Exit(err.Error(), exitCodeRuntimeError)
 			}
 
-			fmt.Println(file1, file2)
+			selectedFormatter, err := selectFormatter(outputFormat)
+			if err != nil {
+				return cli.Exit(err.Error(), exitCodeUsageError)
+			}
+
+			output := code.GenDiff(leftNode, rightNode, selectedFormatter)
+
+			fmt.Println(output)
 
 			return nil
 		},
+	}
+}
+
+func selectFormatter(format string) (formatter.Formatter, error) {
+	switch format {
+	case emptyFlag, formatter.FormatStylish:
+		return stylish.New(), nil
+	default:
+		return nil, fmt.Errorf("%w: %s", formatter.ErrUnknownFormat, format)
 	}
 }
