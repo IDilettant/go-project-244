@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -8,9 +9,12 @@ import (
 type Node map[string]any
 
 func parseJSON(data []byte) (Node, error) {
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.UseNumber()
+
 	var out Node
 
-	if err := json.Unmarshal(data, &out); err != nil {
+	if err := dec.Decode(&out); err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidJSON, err)
 	}
 
