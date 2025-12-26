@@ -10,7 +10,8 @@ import (
 func main() {
 	cmd := app.New()
 
-	if err := cmd.Run(context.Background(), os.Args); err != nil {
+	err := cmd.Run(context.Background(), os.Args)
+	if err != nil {
 		os.Exit(1)
 	}
 }
