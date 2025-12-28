@@ -7,6 +7,7 @@ import (
 	"code/internal/parser"
 )
 
+// Compare computes a diff between two flat JSON nodes
 func Compare(leftNode, rightNode parser.Node) []Change {
 	sortedKeys := getSortedUnionKeys(leftNode, rightNode)
 
@@ -51,12 +52,14 @@ func buildChangeForKey(key string, leftNode, rightNode parser.Node) Change {
 			Key:      key,
 			Type:     Removed,
 			OldValue: leftValue,
+			NewValue: nil,
 		}
 
 	case hasOnlyInRight(leftExists, rightExists):
 		return Change{
 			Key:      key,
 			Type:     Added,
+			OldValue: nil,
 			NewValue: rightValue,
 		}
 
@@ -65,6 +68,7 @@ func buildChangeForKey(key string, leftNode, rightNode parser.Node) Change {
 			Key:      key,
 			Type:     Unchanged,
 			OldValue: leftValue,
+			NewValue: rightValue,
 		}
 
 	default:
