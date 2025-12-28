@@ -10,7 +10,6 @@ type Node map[string]any
 
 func parseJSON(data []byte) (Node, error) {
 	dec := json.NewDecoder(bytes.NewReader(data))
-	dec.UseNumber()
 
 	var out Node
 
