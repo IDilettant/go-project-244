@@ -1,7 +1,6 @@
 package stylish
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -77,8 +76,8 @@ func (f *Formatter) formatValue(value any) string {
 	case bool:
 		return strconv.FormatBool(typedValue)
 
-	case json.Number:
-		return typedValue.String()
+	case float64:
+		return strconv.FormatFloat(typedValue, 'f', -1, 64)
 
 	default:
 		return fmt.Sprintf("%v", typedValue)
