@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/urfave/cli/v3"
@@ -10,11 +11,6 @@ import (
 	"code/internal/formatter"
 	"code/internal/formatter/stylish"
 	"code/internal/parser"
-)
-
-const (
-	exitCodeUsageError   = 2
-	exitCodeRuntimeError = 1
 )
 
 const (
@@ -45,35 +41,19 @@ func New() *cli.Command {
 				_ = cli.ShowRootCommandHelp(cmd)
 
 				return cli.Exit(
-					fmt.Sprintf(
-						"\nexpected %d arguments: <filepath1> <filepath2>",
-						requiredArgumentsCount,
-					),
+					invalidArgsError(),
 					exitCodeUsageError,
 				)
 			}
 
 			firstFilepath := cmd.Args().Get(0)
 			secondFilepath := cmd.Args().Get(1)
-
 			outputFormat := cmd.String(formatFlag)
 
-			leftNode, err := parser.ParseFile(firstFilepath)
+			output, err := run(firstFilepath, secondFilepath, outputFormat)
 			if err != nil {
-				return cli.Exit(err.Error(), exitCodeRuntimeError)
+				return cli.Exit(err.Error(), exitCodeFrom(err))
 			}
-
-			rightNode, err := parser.ParseFile(secondFilepath)
-			if err != nil {
-				return cli.Exit(err.Error(), exitCodeRuntimeError)
-			}
-
-			selectedFormatter, err := selectFormatter(outputFormat)
-			if err != nil {
-				return cli.Exit(err.Error(), exitCodeUsageError)
-			}
-
-			output := code.GenDiff(leftNode, rightNode, selectedFormatter)
 
 			fmt.Println(output)
 
@@ -82,11 +62,39 @@ func New() *cli.Command {
 	}
 }
 
+func run(filepath1, filepath2, format string) (string, error) {
+	leftNode, err := parser.ParseFile(filepath1)
+	if err != nil {
+		return "", fmt.Errorf("%w: %w", ErrRuntime, err)
+	}
+
+	rightNode, err := parser.ParseFile(filepath2)
+	if err != nil {
+		return "", fmt.Errorf("%w: %w", ErrRuntime, err)
+	}
+
+	selectedFormatter, err := selectFormatter(format)
+	if err != nil {
+		return "", fmt.Errorf("%w: %w", ErrUsage, err)
+	}
+
+	return code.GenDiff(leftNode, rightNode, selectedFormatter), nil
+}
+
 func selectFormatter(format string) (formatter.Formatter, error) {
 	switch format {
 	case emptyFlag, formatter.FormatStylish:
 		return stylish.New(), nil
 	default:
 		return nil, fmt.Errorf("%w: %s", formatter.ErrUnknownFormat, format)
+	}
+}
+
+func exitCodeFrom(err error) int {
+	switch {
+	case errors.Is(err, ErrUsage):
+		return exitCodeUsageError
+	default:
+		return exitCodeRuntimeError
 	}
 }
