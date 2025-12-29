@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+const (
+	extJSON = ".json"
+	extYAML = ".yaml"
+	extYML  = ".yml"
+)
+
 // ParseFile reads config from path and parses it according to file extension
 func ParseFile(path string) (Node, error) {
 	absPath, err := filepath.Abs(path)
@@ -21,10 +27,18 @@ func ParseFile(path string) (Node, error) {
 
 	ext := strings.ToLower(filepath.Ext(absPath))
 
+	var node Node
 	switch ext {
-	case ".json":
-		return parseJSON(data)
+	case extJSON:
+		node, err = parseJSON(data)
+	case extYAML, extYML:
+		node, err = parseYAML(data)
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrUnsupportedFormat, ext)
 	}
+	if err != nil {
+		return nil, err
+	}
+
+	return normalizeNode(node)
 }
