@@ -18,35 +18,63 @@ const (
 	fixtureDir  = "fixture"
 	flatFixture = "flat"
 
-	leftFileName  = "filepath1.json"
-	rightFileName = "filepath2.json"
-	expectedFile  = "expected_stylish.txt"
+	leftJSONFileName  = "filepath1.json"
+	rightJSONFileName = "filepath2.json"
+
+	leftYMLFileName  = "filepath1.yml"
+	rightYMLFileName = "filepath2.yml"
+
+	expectedFile = "expected_stylish.txt"
 )
 
 func TestStylishFormatterIntegrationFlatFixture(t *testing.T) {
 	t.Parallel()
 
 	td := flatFixtureDir(t)
-
-	leftPath := filepath.Join(td, leftFileName)
-	rightPath := filepath.Join(td, rightFileName)
 	wantPath := filepath.Join(td, expectedFile)
-
-	left, err := parser.ParseFile(leftPath)
-	require.NoError(t, err)
-
-	right, err := parser.ParseFile(rightPath)
-	require.NoError(t, err)
-
-	changes := diff.Compare(left, right)
-
-	f := stylish.New()
-	got := f.Format(changes)
 
 	wantBytes, err := os.ReadFile(wantPath)
 	require.NoError(t, err)
+	want := string(wantBytes)
 
-	require.Equal(t, string(wantBytes), got)
+	tests := []struct {
+		name      string
+		leftFile  string
+		rightFile string
+	}{
+		{
+			name:      "ok/json files",
+			leftFile:  leftJSONFileName,
+			rightFile: rightJSONFileName,
+		},
+		{
+			name:      "ok/yml files",
+			leftFile:  leftYMLFileName,
+			rightFile: rightYMLFileName,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			leftPath := filepath.Join(td, tt.leftFile)
+			rightPath := filepath.Join(td, tt.rightFile)
+
+			left, err := parser.ParseFile(leftPath)
+			require.NoError(t, err)
+
+			right, err := parser.ParseFile(rightPath)
+			require.NoError(t, err)
+
+			changes := diff.Compare(left, right)
+
+			f := stylish.New()
+			got := f.Format(changes)
+
+			require.Equal(t, want, got)
+		})
+	}
 }
 
 func flatFixtureDir(t *testing.T) string {
@@ -65,3 +93,4 @@ func flatFixtureDir(t *testing.T) string {
 		flatFixture,
 	)
 }
+
