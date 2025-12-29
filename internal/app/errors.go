@@ -23,3 +23,7 @@ func invalidArgsError() error {
 	)
 }
 
+func wrap(kind, err error) error {
+	return fmt.Errorf("%w: %w", kind, err)
+}
+

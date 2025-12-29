@@ -23,7 +23,7 @@ func (s *stubFormatter) Format(changes []diff.Change) string {
 	return s.out
 }
 
-func TestGenDiff_smoke(t *testing.T) {
+func TestGenDiffDelegatesToFormatter(t *testing.T) {
 	t.Parallel()
 
 	left := parser.Node{"a": float64(1)}

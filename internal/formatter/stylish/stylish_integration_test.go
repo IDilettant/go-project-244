@@ -23,7 +23,7 @@ const (
 	expectedFile  = "expected_stylish.txt"
 )
 
-func TestStylishFormatter_integration_flat_fixture(t *testing.T) {
+func TestStylishFormatterIntegrationFlatFixture(t *testing.T) {
 	t.Parallel()
 
 	td := flatFixtureDir(t)
@@ -52,17 +52,12 @@ func TestStylishFormatter_integration_flat_fixture(t *testing.T) {
 func flatFixtureDir(t *testing.T) string {
 	t.Helper()
 
-	// current file: internal/formatter/stylish/stylish_integration_test.go
 	_, thisFile, _, ok := runtime.Caller(0)
 	require.True(t, ok, "runtime.Caller failed")
 
-	// .../internal/formatter/stylish
 	stylishDir := filepath.Dir(thisFile)
-
-	// .../internal/formatter
 	formatterDir := filepath.Dir(stylishDir)
 
-	// .../internal/formatter/testdata/fixture/flat
 	return filepath.Join(
 		formatterDir,
 		testdataDir,
@@ -70,4 +65,3 @@ func flatFixtureDir(t *testing.T) string {
 		flatFixture,
 	)
 }
-

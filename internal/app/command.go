@@ -55,7 +55,10 @@ func New() *cli.Command {
 				return cli.Exit(err.Error(), exitCodeFrom(err))
 			}
 
-			fmt.Println(output)
+			_, err = fmt.Fprintln(cmd.Writer, output)
+			if err != nil {
+				return err
+			}
 
 			return nil
 		},
@@ -65,17 +68,17 @@ func New() *cli.Command {
 func run(filepath1, filepath2, format string) (string, error) {
 	leftNode, err := parser.ParseFile(filepath1)
 	if err != nil {
-		return "", fmt.Errorf("%w: %w", ErrRuntime, err)
+		return "", wrap(ErrRuntime, err)
 	}
 
 	rightNode, err := parser.ParseFile(filepath2)
 	if err != nil {
-		return "", fmt.Errorf("%w: %w", ErrRuntime, err)
+		return "", wrap(ErrRuntime, err)
 	}
 
 	selectedFormatter, err := selectFormatter(format)
 	if err != nil {
-		return "", fmt.Errorf("%w: %w", ErrUsage, err)
+		return "", wrap(ErrUsage, err)
 	}
 
 	return code.GenDiff(leftNode, rightNode, selectedFormatter), nil

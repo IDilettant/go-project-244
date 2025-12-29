@@ -1,6 +1,8 @@
 package app
 
 import (
+	"bytes"
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -43,7 +45,7 @@ func TestSelectFormatter(t *testing.T) {
 	}
 }
 
-func TestRun_smoke(t *testing.T) {
+func TestRunReturnsDiffOutput(t *testing.T) {
 	t.Parallel()
 
 	left := writeTempJSONFile(t, "left.json", `{"host":"hexlet.io","timeout":50}`)
@@ -114,6 +116,24 @@ func TestRun_smoke(t *testing.T) {
 	}
 }
 
+func TestNew_RunSuccess_WritesOutput(t *testing.T) {
+	left := writeTempJSONFile(t, "left.json", `{"host":"hexlet.io","timeout":50}`)
+	right := writeTempJSONFile(t, "right.json", `{"host":"hexlet.io","timeout":20}`)
+
+	cmd := New()
+	buf := &bytes.Buffer{}
+	cmd.Writer = buf
+
+	err := cmd.Run(context.Background(), []string{
+		"gendiff",
+		left,
+		right,
+	})
+
+	require.NoError(t, err)
+	require.NotEmpty(t, buf.String())
+}
+
 func writeTempJSONFile(t *testing.T, name, content string) string {
 	t.Helper()
 
@@ -124,4 +144,3 @@ func writeTempJSONFile(t *testing.T, name, content string) string {
 
 	return path
 }
-

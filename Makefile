@@ -8,6 +8,8 @@ build:
 	go build -o bin/gendiff ./cmd/gendiff
 
 cover:
-	go test ./... -count=1 -coverprofile=coverage.out && go tool cover -func=coverage.out
+	go test -v ./... -race -count=1 -covermode=atomic -coverprofile=coverage.out
+	go tool cover -func=coverage.out
+
 
 .PHONY: test lint build cover

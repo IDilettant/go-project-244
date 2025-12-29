@@ -8,7 +8,7 @@ import (
 	"code/internal/parser"
 )
 
-func TestCompare_semantics(t *testing.T) {
+func TestCompareSemantics(t *testing.T) {
 	t.Parallel()
 
 	type testCase struct {
@@ -133,7 +133,7 @@ func TestCompare_semantics(t *testing.T) {
 	}
 }
 
-func TestCompare_ordering_sorts_keys_ascending(t *testing.T) {
+func TestCompareOrderingSortsKeysAscending(t *testing.T) {
 	t.Parallel()
 
 	left := parser.Node{
@@ -164,17 +164,17 @@ func assertChange(t *testing.T, got Change, want Change) {
 
 	switch want.Type {
 	case Added:
-		require.Equal(t, want.NewValue, got.NewValue, "new value mismatch for key %q", want.Key)
+		require.Equal(t, want.NewValue, got.NewValue)
 
 	case Removed:
-		require.Equal(t, want.OldValue, got.OldValue, "old value mismatch for key %q", want.Key)
+		require.Equal(t, want.OldValue, got.OldValue)
 
 	case Updated:
-		require.Equal(t, want.OldValue, got.OldValue, "old value mismatch for key %q", want.Key)
-		require.Equal(t, want.NewValue, got.NewValue, "new value mismatch for key %q", want.Key)
+		require.Equal(t, want.OldValue, got.OldValue)
+		require.Equal(t, want.NewValue, got.NewValue)
 
 	case Unchanged:
-		require.Equal(t, want.OldValue, got.OldValue, "old value mismatch for key %q", want.Key)
+		require.Equal(t, want.OldValue, got.OldValue)
 
 	default:
 		t.Fatalf("unknown ChangeType: %v", want.Type)
