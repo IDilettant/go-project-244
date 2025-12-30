@@ -6,80 +6,143 @@ import (
 	"strings"
 
 	"code/internal/diff"
+	"code/internal/domain"
 	"code/internal/formatter"
 )
 
 type Formatter struct{}
 
-func New() *Formatter {
-	return &Formatter{}
-}
+func New() *Formatter { return &Formatter{} }
+
+const (
+	rootDepth  = 1
+	indentStep = 4
+
+	plainShift  = 2
+	signedShift = 4
+)
 
 func (f *Formatter) Format(changes []diff.Change) string {
-	var builder strings.Builder
+	var b strings.Builder
+	b.WriteString(formatter.OpeningBrace)
+	b.WriteString(formatter.NewLine)
 
-	builder.WriteString(formatter.OpeningBrace)
-	builder.WriteString(formatter.NewLine)
+	f.writeChanges(&b, changes, rootDepth)
 
-	for _, change := range changes {
-		f.writeChange(&builder, change)
-	}
+	b.WriteString(formatter.ClosingBrace)
 
-	builder.WriteString(formatter.ClosingBrace)
-
-	return builder.String()
+	return b.String()
 }
 
-func (f *Formatter) writeChange(builder *strings.Builder, change diff.Change) {
-	switch change.Type {
+func (f *Formatter) writeChanges(b *strings.Builder, changes []diff.Change, depth int) {
+	for _, ch := range changes {
+		f.writeChange(b, ch, depth)
+	}
+}
+
+func (f *Formatter) writeChange(b *strings.Builder, ch diff.Change, depth int) {
+	if ch.IsContainer() {
+		f.writeNested(b, ch, depth)
+
+		return
+	}
+
+	switch ch.Type {
 	case diff.Unchanged:
-		f.writeUnchangedLine(builder, change.Key, change.OldValue)
+		f.writeLine(b, depth, "", ch.Key, ch.OldValue)
 
 	case diff.Removed:
-		f.writeSignedLine(builder, formatter.SignRemoved, change.Key, change.OldValue)
+		f.writeLine(b, depth, formatter.SignRemoved, ch.Key, ch.OldValue)
 
 	case diff.Added:
-		f.writeSignedLine(builder, formatter.SignAdded, change.Key, change.NewValue)
+		f.writeLine(b, depth, formatter.SignAdded, ch.Key, ch.NewValue)
 
 	case diff.Updated:
-		f.writeSignedLine(builder, formatter.SignRemoved, change.Key, change.OldValue)
-		f.writeSignedLine(builder, formatter.SignAdded, change.Key, change.NewValue)
+		f.writeLine(b, depth, formatter.SignRemoved, ch.Key, ch.OldValue)
+		f.writeLine(b, depth, formatter.SignAdded, ch.Key, ch.NewValue)
 	}
 }
 
-func (f *Formatter) writeUnchangedLine(builder *strings.Builder, key string, value any) {
-	builder.WriteString(formatter.IndentForUnchanged)
-	builder.WriteString(key)
-	builder.WriteString(formatter.ColonSpace)
-	builder.WriteString(f.formatValue(value))
-	builder.WriteString(formatter.NewLine)
+func (f *Formatter) writeNested(b *strings.Builder, ch diff.Change, depth int) {
+	b.WriteString(f.keyIndent(depth))
+	b.WriteString(ch.Key)
+	b.WriteString(formatter.ColonSpace)
+	b.WriteString(formatter.OpeningBrace)
+	b.WriteString(formatter.NewLine)
+
+	f.writeChanges(b, ch.Children, depth+1)
+
+	b.WriteString(f.keyIndent(depth))
+	b.WriteString(formatter.ClosingBrace)
+	b.WriteString(formatter.NewLine)
 }
 
-func (f *Formatter) writeSignedLine(builder *strings.Builder, sign string, key string, value any) {
-	builder.WriteString(formatter.IndentBase)
-	builder.WriteString(sign)
-	builder.WriteString(formatter.Space)
-	builder.WriteString(key)
-	builder.WriteString(formatter.ColonSpace)
-	builder.WriteString(f.formatValue(value))
-	builder.WriteString(formatter.NewLine)
+func (f *Formatter) writeLine(b *strings.Builder, depth int, sign string, key string, value any) {
+	b.WriteString(f.linePrefix(depth, sign))
+	b.WriteString(key)
+	b.WriteString(formatter.ColonSpace)
+	b.WriteString(f.renderValue(value, depth))
+	b.WriteString(formatter.NewLine)
 }
 
-func (f *Formatter) formatValue(value any) string {
-	switch typedValue := value.(type) {
+func (f *Formatter) linePrefix(depth int, sign string) string {
+	if sign == "" {
+		return f.keyIndent(depth)
+	}
+
+	base := strings.Repeat(formatter.Space, depth*indentStep-signedShift)
+
+	return base + sign + formatter.Space
+}
+
+func (f *Formatter) keyIndent(depth int) string {
+	return strings.Repeat(formatter.Space, depth*indentStep-plainShift)
+}
+
+func (f *Formatter) renderValue(v any, depth int) string {
+	switch x := v.(type) {
 	case nil:
 		return formatter.NullString
-
 	case string:
-		return typedValue
-
+		return x
 	case bool:
-		return strconv.FormatBool(typedValue)
-
+		return strconv.FormatBool(x)
 	case float64:
-		return strconv.FormatFloat(typedValue, 'f', -1, 64)
+		return strconv.FormatFloat(x, 'f', -1, 64)
+
+	case domain.Node:
+		return f.renderNode(x, depth)
+
+	case map[string]any:
+		return f.renderNode(domain.Node(x), depth)
 
 	default:
-		return fmt.Sprintf("%v", typedValue)
+		return fmt.Sprintf("%v", x)
 	}
 }
+
+func (f *Formatter) renderNode(obj domain.Node, depth int) string {
+	if len(obj) == 0 {
+		return formatter.OpeningBrace + formatter.ClosingBrace
+	}
+
+	next := depth + 1
+
+	var b strings.Builder
+	b.WriteString(formatter.OpeningBrace)
+	b.WriteString(formatter.NewLine)
+
+	for _, k := range obj.KeysSorted() {
+		b.WriteString(f.keyIndent(next))
+		b.WriteString(k)
+		b.WriteString(formatter.ColonSpace)
+		b.WriteString(f.renderValue(obj[k], next))
+		b.WriteString(formatter.NewLine)
+	}
+
+	b.WriteString(f.keyIndent(depth))
+	b.WriteString(formatter.ClosingBrace)
+
+	return b.String()
+}
+
