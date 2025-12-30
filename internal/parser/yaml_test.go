@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 
+	"code/internal/domain"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,7 +15,7 @@ func TestParseYAML(t *testing.T) {
 	type testCase struct {
 		name      string
 		input     string
-		want      Node
+		want      domain.Node
 		errAssert func(error) bool
 	}
 
@@ -21,12 +23,12 @@ func TestParseYAML(t *testing.T) {
 		{
 			name:  "empty/object",
 			input: "{}",
-			want:  Node{},
+			want:  domain.Node{},
 		},
 		{
 			name:  "types/primitives are parsed",
 			input: "s: x\nb: true\nn: null\n",
-			want: Node{
+			want: domain.Node{
 				"s": "x",
 				"b": true,
 				"n": nil,
@@ -35,21 +37,21 @@ func TestParseYAML(t *testing.T) {
 		{
 			name:  "numbers/integer is decoded",
 			input: "a: 1\n",
-			want: Node{
+			want: domain.Node{
 				"a": 1,
 			},
 		},
 		{
 			name:  "numbers/fractional is decoded",
 			input: "a: 1.5\n",
-			want: Node{
+			want: domain.Node{
 				"a": 1.5,
 			},
 		},
 		{
 			name:  "numbers/equal magnitude values are decoded consistently",
 			input: "a: 1\nb: 1.0\nc: 1e0\n",
-			want: Node{
+			want: domain.Node{
 				"a": 1,
 				"b": 1.0,
 				"c": 1e0,
@@ -63,7 +65,7 @@ func TestParseYAML(t *testing.T) {
 			},
 		},
 		{
-			name:  "error/top-level must be object for Node",
+			name:  "error/top-level must be object for domain.Node",
 			input: "- 1\n",
 			errAssert: func(err error) bool {
 				return errors.Is(err, ErrInvalidYAML)
@@ -89,4 +91,3 @@ func TestParseYAML(t *testing.T) {
 		})
 	}
 }
-

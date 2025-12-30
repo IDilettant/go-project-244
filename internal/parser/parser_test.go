@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"code/internal/domain"
 )
 
 func TestParseFile(t *testing.T) {
@@ -15,7 +17,7 @@ func TestParseFile(t *testing.T) {
 		name      string
 		path      string
 		setup     func(t *testing.T) string
-		want      Node
+		want      domain.Node
 		errAssert func(t *testing.T, err error)
 	}
 
@@ -31,7 +33,23 @@ func TestParseFile(t *testing.T) {
 
 				return p
 			},
-			want: Node{
+			want: domain.Node{
+				"a": float64(1),
+				"b": "x",
+			},
+		},
+		{
+			name: "ok/yaml file parsed and numbers normalized",
+			setup: func(t *testing.T) string {
+				t.Helper()
+
+				dir := t.TempDir()
+				p := filepath.Join(dir, "file.yaml")
+				require.NoError(t, os.WriteFile(p, []byte("a: 1\nb: x\n"), 0o644))
+
+				return p
+			},
+			want: domain.Node{
 				"a": float64(1),
 				"b": "x",
 			},
@@ -49,7 +67,6 @@ func TestParseFile(t *testing.T) {
 			},
 			errAssert: func(t *testing.T, err error) {
 				t.Helper()
-
 				require.ErrorIs(t, err, ErrUnsupportedFormat)
 			},
 		},
@@ -58,7 +75,6 @@ func TestParseFile(t *testing.T) {
 			path: filepath.Join("no", "such", "file.json"),
 			errAssert: func(t *testing.T, err error) {
 				t.Helper()
-
 				require.Error(t, err)
 				require.Contains(t, err.Error(), "read file")
 			},

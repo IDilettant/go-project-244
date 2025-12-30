@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 
+	"code/internal/domain"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,7 +15,7 @@ func TestParseJSON(t *testing.T) {
 	type testCase struct {
 		name      string
 		input     string
-		want      Node
+		want      domain.Node
 		errAssert func(error) bool
 	}
 
@@ -21,12 +23,12 @@ func TestParseJSON(t *testing.T) {
 		{
 			name:  "empty/object",
 			input: `{}`,
-			want:  Node{},
+			want:  domain.Node{},
 		},
 		{
 			name:  "types/primitives are parsed",
 			input: `{"s":"x","b":true,"n":null}`,
-			want: Node{
+			want: domain.Node{
 				"s": "x",
 				"b": true,
 				"n": nil,
@@ -35,21 +37,21 @@ func TestParseJSON(t *testing.T) {
 		{
 			name:  "numbers/integer is decoded as float64",
 			input: `{"a":1}`,
-			want: Node{
+			want: domain.Node{
 				"a": float64(1),
 			},
 		},
 		{
 			name:  "numbers/fractional is decoded as float64 with fraction",
 			input: `{"a":1.5}`,
-			want: Node{
+			want: domain.Node{
 				"a": float64(1.5),
 			},
 		},
 		{
 			name:  "numbers/equal magnitude numbers have equal decoded representation",
 			input: `{"a":1,"b":1.0,"c":1e0}`,
-			want: Node{
+			want: domain.Node{
 				"a": float64(1),
 				"b": float64(1),
 				"c": float64(1),
@@ -63,7 +65,7 @@ func TestParseJSON(t *testing.T) {
 			},
 		},
 		{
-			name:  "error/top-level must be object for Node",
+			name:  "error/top-level must be object for domain.Node",
 			input: `[]`,
 			errAssert: func(err error) bool {
 				return errors.Is(err, ErrInvalidJSON)

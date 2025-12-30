@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"code/internal/domain"
 )
 
 func TestNormalizeNode(t *testing.T) {
@@ -11,19 +13,19 @@ func TestNormalizeNode(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		input     Node
-		want      Node
+		input     domain.Node
+		want      domain.Node
 		errAssert func(error) bool
 	}{
 		{
 			name: "ok/primitives are preserved",
-			input: Node{
+			input: domain.Node{
 				"s": "x",
 				"b": true,
 				"n": nil,
 				"f": float64(1.5),
 			},
-			want: Node{
+			want: domain.Node{
 				"s": "x",
 				"b": true,
 				"n": nil,
@@ -32,41 +34,41 @@ func TestNormalizeNode(t *testing.T) {
 		},
 		{
 			name: "ok/ints are converted to float64",
-			input: Node{
+			input: domain.Node{
 				"i": int(1),
 				"j": int64(2),
 			},
-			want: Node{
+			want: domain.Node{
 				"i": float64(1),
 				"j": float64(2),
 			},
 		},
 		{
 			name: "ok/nested structures are normalized",
-			input: Node{
-				"outer": Node{
-					"inner": Node{
+			input: domain.Node{
+				"outer": domain.Node{
+					"inner": domain.Node{
 						"i": int(10),
 						"f": float64(2.25),
 					},
 					"arr": []any{
 						int(1),
 						float64(2.5),
-						Node{"x": int64(3)},
+						domain.Node{"x": int64(3)},
 						[]any{int(4), float64(5.75)},
 					},
 				},
 			},
-			want: Node{
-				"outer": Node{
-					"inner": Node{
+			want: domain.Node{
+				"outer": domain.Node{
+					"inner": domain.Node{
 						"i": float64(10),
 						"f": float64(2.25),
 					},
 					"arr": []any{
 						float64(1),
 						float64(2.5),
-						Node{"x": float64(3)},
+						domain.Node{"x": float64(3)},
 						[]any{float64(4), float64(5.75)},
 					},
 				},
@@ -74,16 +76,16 @@ func TestNormalizeNode(t *testing.T) {
 		},
 		{
 			name: "ok/yaml map any any is converted to node",
-			input: Node{
-				"outer": map[any]any{
-					"inner": map[any]any{
+			input: domain.Node{
+				"outer": domain.Node{
+					"inner": domain.Node{
 						"i": int(1),
 					},
 				},
 			},
-			want: Node{
-				"outer": Node{
-					"inner": Node{
+			want: domain.Node{
+				"outer": domain.Node{
+					"inner": domain.Node{
 						"i": float64(1),
 					},
 				},
@@ -91,7 +93,7 @@ func TestNormalizeNode(t *testing.T) {
 		},
 		{
 			name: "error/yaml map with non string key",
-			input: Node{
+			input: domain.Node{
 				"bad": map[any]any{
 					1: "x",
 				},
