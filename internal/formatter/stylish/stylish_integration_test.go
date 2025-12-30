@@ -16,7 +16,6 @@ import (
 const (
 	testdataDir = "testdata"
 	fixtureDir  = "fixture"
-	flatFixture = "flat"
 
 	leftJSONFileName  = "filepath1.json"
 	rightJSONFileName = "filepath2.json"
@@ -27,10 +26,10 @@ const (
 	expectedFile = "expected_stylish.txt"
 )
 
-func TestStylishFormatterIntegrationFlatFixture(t *testing.T) {
+func TestStylishFormatterIntegration(t *testing.T) {
 	t.Parallel()
 
-	td := flatFixtureDir(t)
+	td := getFixtureDirPath(t)
 	wantPath := filepath.Join(td, expectedFile)
 
 	wantBytes, err := os.ReadFile(wantPath)
@@ -77,7 +76,7 @@ func TestStylishFormatterIntegrationFlatFixture(t *testing.T) {
 	}
 }
 
-func flatFixtureDir(t *testing.T) string {
+func getFixtureDirPath(t *testing.T) string {
 	t.Helper()
 
 	_, thisFile, _, ok := runtime.Caller(0)
@@ -90,7 +89,6 @@ func flatFixtureDir(t *testing.T) string {
 		formatterDir,
 		testdataDir,
 		fixtureDir,
-		flatFixture,
 	)
 }
 
