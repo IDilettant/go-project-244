@@ -1,49 +1,53 @@
 package parser
 
-import "fmt"
+import (
+	"fmt"
 
-func normalizeValue(value any) (any, error) {
-	switch typed := value.(type) {
-	case nil, string, bool, float64:
-		return typed, nil
+	"code/internal/domain"
+)
 
-	case int:
-		return float64(typed), nil
-	case int64:
-		return float64(typed), nil
-
-	case Node:
-		return normalizeNode(typed)
-
-	case map[any]any:
-		node, err := convertToNode(typed)
-		if err != nil {
-			return nil, err
-		}
-
-		return normalizeNode(node)
-
-	case []any:
-		return normalizeSlice(typed)
-
-	default:
-		return value, nil
-	}
-}
-
-func normalizeNode(node Node) (Node, error) {
-	out := make(Node, len(node))
+func normalizeNode(node domain.Node) (domain.Node, error) {
+	out := make(domain.Node, len(node))
 
 	for key, value := range node {
 		normalized, err := normalizeValue(value)
 		if err != nil {
 			return nil, err
 		}
-
 		out[key] = normalized
 	}
 
 	return out, nil
+}
+
+func normalizeValue(v any) (any, error) {
+	switch x := v.(type) {
+	case nil, string, bool, float64:
+		return x, nil
+
+	case int:
+		return float64(x), nil
+	case int64:
+		return float64(x), nil
+
+	case []any:
+		return normalizeSlice(x)
+
+	case map[any]any:
+		n, err := convertToNode(x)
+		if err != nil {
+			return nil, err
+		}
+		
+		return normalizeNode(n)
+
+	default:
+		if n, ok := domain.AsNode(x); ok {
+			return normalizeNode(n)
+		}
+
+		return nil, fmt.Errorf("%w: %T", ErrUnsupportedType, v)
+	}
 }
 
 func normalizeSlice(items []any) ([]any, error) {
@@ -54,23 +58,27 @@ func normalizeSlice(items []any) ([]any, error) {
 		if err != nil {
 			return nil, err
 		}
-
 		out[i] = normalized
 	}
 
 	return out, nil
 }
 
-func convertToNode(m map[any]any) (Node, error) {
-	out := make(Node, len(m))
+func convertToNode(m map[any]any) (domain.Node, error) {
+	out := make(domain.Node, len(m))
 
 	for key, value := range m {
 		keyString, ok := key.(string)
 		if !ok {
-			return nil, fmt.Errorf("%w: non-string key %T", ErrInvalidYAML, key)
+			return nil, fmt.Errorf("%w: key type %T", ErrUnsupportedType, key)
 		}
 
-		out[keyString] = value
+		normalized, err := normalizeValue(value)
+		if err != nil {
+			return nil, err
+		}
+
+		out[keyString] = normalized
 	}
 
 	return out, nil

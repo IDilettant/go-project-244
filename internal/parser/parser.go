@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"code/internal/domain"
 )
 
 const (
@@ -14,7 +16,7 @@ const (
 )
 
 // ParseFile reads config from path and parses it according to file extension
-func ParseFile(path string) (Node, error) {
+func ParseFile(path string) (domain.Node, error) {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		return nil, fmt.Errorf("resolve path %q: %w", path, err)
@@ -27,7 +29,7 @@ func ParseFile(path string) (Node, error) {
 
 	ext := strings.ToLower(filepath.Ext(absPath))
 
-	var node Node
+	var node domain.Node
 	switch ext {
 	case extJSON:
 		node, err = parseJSON(data)

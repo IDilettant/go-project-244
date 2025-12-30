@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
+	"code/internal/domain"
 )
 
-type Node map[string]any
-
-func parseJSON(data []byte) (Node, error) {
+func parseJSON(data []byte) (domain.Node, error) {
 	dec := json.NewDecoder(bytes.NewReader(data))
 
-	var out Node
+	var out domain.Node
 
 	if err := dec.Decode(&out); err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidJSON, err)
