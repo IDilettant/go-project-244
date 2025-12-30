@@ -7,7 +7,7 @@ import (
 
 	"code"
 	"code/internal/diff"
-	"code/internal/parser"
+	"code/internal/domain"
 )
 
 type stubFormatter struct {
@@ -26,8 +26,8 @@ func (s *stubFormatter) Format(changes []diff.Change) string {
 func TestGenDiffDelegatesToFormatter(t *testing.T) {
 	t.Parallel()
 
-	left := parser.Node{"a": float64(1)}
-	right := parser.Node{"a": float64(2)}
+	left := domain.Node{"a": float64(1)}
+	right := domain.Node{"a": float64(2)}
 
 	sf := &stubFormatter{out: "RESULT"}
 
