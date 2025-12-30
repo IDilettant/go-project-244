@@ -14,4 +14,9 @@ type Change struct {
 	Type     ChangeType
 	OldValue any
 	NewValue any
+	Children []Change
+}
+
+func (c Change) IsContainer() bool {
+	return c.Children != nil
 }
