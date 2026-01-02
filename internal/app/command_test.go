@@ -31,7 +31,7 @@ func TestRunReturnsDiffOutput(t *testing.T) {
 		{
 			name: "ok/run returns diff output",
 			run: func() (string, error) {
-				return run(left, right, common.FormatStylish)
+				return Run(left, right, common.FormatStylish)
 			},
 			wantCode: 0,
 			wantOut:  true,
@@ -39,7 +39,7 @@ func TestRunReturnsDiffOutput(t *testing.T) {
 		{
 			name: "error/unknown format is usage error",
 			run: func() (string, error) {
-				return run(left, right, "unknown")
+				return Run(left, right, "unknown")
 			},
 			wantErrIs: ErrUsage,
 			wantCode:  exitCodeUsageError,
@@ -47,7 +47,7 @@ func TestRunReturnsDiffOutput(t *testing.T) {
 		{
 			name: "error/missing file is runtime error",
 			run: func() (string, error) {
-				return run(missing, right, common.FormatStylish)
+				return Run(missing, right, common.FormatStylish)
 			},
 			wantErrIs: ErrRuntime,
 			wantCode:  exitCodeRuntimeError,

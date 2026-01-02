@@ -1,13 +1,8 @@
 package code
 
-import (
-	"code/internal/diff"
-	"code/internal/domain"
-	"code/internal/formatters"
-)
+import "code/internal/app"
 
-func GenDiff(leftNode, rightNode domain.Node, f formatters.Formatter) string {
-	changes := diff.Compare(leftNode, rightNode)
-
-	return f.Format(changes)
+// GenDiff reads two config files, computes a diff, and renders it in the requested output format
+func GenDiff(filepath1, filepath2, format string) (string, error) {
+	return app.Run(filepath1, filepath2, format)
 }

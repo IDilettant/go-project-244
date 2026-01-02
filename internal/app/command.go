@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"code"
+	"code/internal/diff"
 	"code/internal/formatters"
 	"code/internal/formatters/common"
 	"code/internal/parser"
@@ -47,7 +47,7 @@ func New() *cli.Command {
 			secondFilepath := cmd.Args().Get(1)
 			outputFormat := cmd.String(formatFlag)
 
-			output, err := run(firstFilepath, secondFilepath, outputFormat)
+			output, err := Run(firstFilepath, secondFilepath, outputFormat)
 			if err != nil {
 				return cli.Exit(err.Error(), exitCodeFrom(err))
 			}
@@ -62,7 +62,7 @@ func New() *cli.Command {
 	}
 }
 
-func run(filepath1, filepath2, format string) (string, error) {
+func Run(filepath1, filepath2, format string) (string, error) {
 	leftNode, err := parser.ParseFile(filepath1)
 	if err != nil {
 		return "", wrap(ErrRuntime, err)
@@ -78,7 +78,9 @@ func run(filepath1, filepath2, format string) (string, error) {
 		return "", wrap(ErrUsage, err)
 	}
 
-	return code.GenDiff(leftNode, rightNode, selectedFormatter), nil
+	changes := diff.Compare(leftNode, rightNode)
+
+	return selectedFormatter.Format(changes), nil
 }
 
 func exitCodeFrom(err error) int {
