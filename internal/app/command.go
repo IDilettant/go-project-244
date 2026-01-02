@@ -8,19 +8,16 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"code"
-	"code/internal/formatter"
-	"code/internal/formatter/stylish"
+	"code/internal/formatters"
+	"code/internal/formatters/common"
 	"code/internal/parser"
 )
 
 const (
-	formatFlag = "format"
-	emptyFlag  = ""
-)
-
-const (
-	defaultFormat          = formatter.FormatStylish
+	defaultFormat          = common.FormatStylish
 	requiredArgumentsCount = 2
+
+	formatFlag = "format"
 )
 
 func New() *cli.Command {
@@ -76,21 +73,12 @@ func run(filepath1, filepath2, format string) (string, error) {
 		return "", wrap(ErrRuntime, err)
 	}
 
-	selectedFormatter, err := selectFormatter(format)
+	selectedFormatter, err := formatters.SelectFormatter(format)
 	if err != nil {
 		return "", wrap(ErrUsage, err)
 	}
 
 	return code.GenDiff(leftNode, rightNode, selectedFormatter), nil
-}
-
-func selectFormatter(format string) (formatter.Formatter, error) {
-	switch format {
-	case emptyFlag, formatter.FormatStylish:
-		return stylish.New(), nil
-	default:
-		return nil, fmt.Errorf("%w: %s", formatter.ErrUnknownFormat, format)
-	}
 }
 
 func exitCodeFrom(err error) int {
