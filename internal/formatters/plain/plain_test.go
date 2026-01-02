@@ -26,7 +26,7 @@ const (
 	expectedFile = "expected_plain.txt"
 )
 
-func TestStylishFormatterIntegration(t *testing.T) {
+func TestPlainFormatterIntegration(t *testing.T) {
 	t.Parallel()
 
 	td := getFixtureDirPath(t)
