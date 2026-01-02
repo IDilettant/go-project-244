@@ -11,6 +11,7 @@ const (
 
 	NullString   = "null"
 	ComplexValue = "[complex value]"
+	Property     = "Property "
 	Quote        = "'"
 
 	OpeningBrace = "{"
@@ -22,4 +23,3 @@ const (
 
 	FormatStylish = "stylish"
 )
-

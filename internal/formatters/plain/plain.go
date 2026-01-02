@@ -45,20 +45,20 @@ func (f *Formatter) writeChange(
 	switch ch.Type {
 
 	case diff.Added:
-		b.WriteString("Property ")
+		b.WriteString(common.Property)
 		writeQuoted(b, path)
 		b.WriteString(" was added with value: ")
 		b.WriteString(renderValue(ch.NewValue))
 		b.WriteString(common.NewLine)
 
 	case diff.Removed:
-		b.WriteString("Property ")
+		b.WriteString(common.Property)
 		writeQuoted(b, path)
 		b.WriteString(" was removed")
 		b.WriteString(common.NewLine)
 
 	case diff.Updated:
-		b.WriteString("Property ")
+		b.WriteString(common.Property)
 		writeQuoted(b, path)
 		b.WriteString(" was updated. From ")
 		b.WriteString(renderValue(ch.OldValue))
@@ -113,4 +113,3 @@ func renderValue(v any) string {
 		return fmt.Sprintf("%v", x)
 	}
 }
-
