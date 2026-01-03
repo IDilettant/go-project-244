@@ -21,32 +21,32 @@ type Formatter struct{}
 func New() *Formatter { return &Formatter{} }
 
 func (f *Formatter) Format(changes []diff.Change) (string, error) {
-	payload := convertChangesToDTO(changes)
+	payload := convertChangesToDTOMap(changes)
 
 	encoded, err := json.MarshalIndent(payload, "", common.IndentBase)
 	if err != nil {
 		return "", err
 	}
 
-	return string(encoded) + common.NewLine, nil
+	output := string(encoded) + common.NewLine
+
+	return output, nil
 }
 
-func convertChangesToDTO(changes []diff.Change) []changeDTO {
-	result := make([]changeDTO, 0, len(changes))
+func convertChangesToDTOMap(changes []diff.Change) map[string]changeDTO {
+	result := make(map[string]changeDTO, len(changes))
 	for _, change := range changes {
-		result = append(result, convertChangeToDTO(change))
+		result[change.Key] = convertChangeToDTO(change)
 	}
+
 	return result
 }
 
 func convertChangeToDTO(change diff.Change) changeDTO {
-	dto := changeDTO{
-		Key:  change.Key,
-		Type: changeTypeToString(change),
-	}
+	dto := changeDTO{Type: changeTypeToString(change)}
 
 	if change.IsContainer() {
-		dto.Children = convertChangesToDTO(change.Children)
+		dto.Children = convertChangesToDTOMap(change.Children)
 
 		return dto
 	}
@@ -74,14 +74,17 @@ func changeTypeToString(change diff.Change) string {
 	switch change.Type {
 	case diff.Unchanged:
 		return changeTypeUnchanged
+
 	case diff.Removed:
 		return changeTypeRemoved
+
 	case diff.Added:
 		return changeTypeAdded
+
 	case diff.Updated:
 		return changeTypeUpdated
+
 	default:
 		return changeTypeUnknown
 	}
 }
-
