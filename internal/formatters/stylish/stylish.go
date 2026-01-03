@@ -15,14 +15,14 @@ type Formatter struct{}
 func New() *Formatter { return &Formatter{} }
 
 const (
-	rootDepth  = 2
+	rootDepth  = 1
 	indentStep = 4
 
 	plainShift  = 2
 	signedShift = 4
 )
 
-func (f *Formatter) Format(changes []diff.Change) string {
+func (f *Formatter) Format(changes []diff.Change) (string, error) {
 	var b strings.Builder
 	b.WriteString(common.OpeningBrace)
 	b.WriteString(common.NewLine)
@@ -31,7 +31,7 @@ func (f *Formatter) Format(changes []diff.Change) string {
 
 	b.WriteString(common.ClosingBrace)
 
-	return b.String()
+	return b.String(), nil
 }
 
 func (f *Formatter) writeChanges(b *strings.Builder, changes []diff.Change, depth int) {
