@@ -18,8 +18,8 @@ const (
 	rootDepth  = 1
 	indentStep = 4
 
-	plainShift  = 2
-	signedShift = 4
+	plainShift  = 0
+	signedShift = 2
 )
 
 func (f *Formatter) Format(changes []diff.Change) (string, error) {
@@ -30,6 +30,7 @@ func (f *Formatter) Format(changes []diff.Change) (string, error) {
 	f.writeChanges(&b, changes, rootDepth)
 
 	b.WriteString(common.ClosingBrace)
+	b.WriteString(common.NewLine)
 
 	return b.String(), nil
 }
