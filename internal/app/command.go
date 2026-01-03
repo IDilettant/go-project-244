@@ -30,7 +30,7 @@ func New() *cli.Command {
 				Name:    formatFlag,
 				Aliases: []string{"f"},
 				Value:   defaultFormat,
-				Usage:   "output format",
+				Usage:   "output format (stylish | plain | json)",
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
