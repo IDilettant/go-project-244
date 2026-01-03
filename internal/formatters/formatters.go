@@ -5,6 +5,7 @@ import (
 
 	"code/internal/diff"
 	"code/internal/formatters/common"
+	fmtJSON "code/internal/formatters/json"
 	"code/internal/formatters/plain"
 	"code/internal/formatters/stylish"
 )
@@ -14,7 +15,7 @@ const (
 )
 
 type Formatter interface {
-	Format(changes []diff.Change) string
+	Format(changes []diff.Change) (string, error)
 }
 
 func SelectFormatter(format string) (Formatter, error) {
@@ -23,6 +24,8 @@ func SelectFormatter(format string) (Formatter, error) {
 		return stylish.New(), nil
 	case common.FormatPlain:
 		return plain.New(), nil
+	case common.FormatJSON:
+		return fmtJSON.New(), nil
 	default:
 		return nil, fmt.Errorf("%w: %s", common.ErrUnknownFormat, format)
 	}
