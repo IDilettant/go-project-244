@@ -22,4 +22,6 @@ const (
 	SignAdded   = "+"
 
 	FormatStylish = "stylish"
+	FormatPlain   = "plain"
+	FormatJSON    = "json"
 )
