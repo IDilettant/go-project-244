@@ -80,7 +80,12 @@ func Run(filepath1, filepath2, format string) (string, error) {
 
 	changes := diff.Compare(leftNode, rightNode)
 
-	return selectedFormatter.Format(changes), nil
+	output, err := selectedFormatter.Format(changes)
+	if err != nil {
+		return "", wrap(ErrRuntime, err)
+	}
+
+	return output, nil
 }
 
 func exitCodeFrom(err error) int {
