@@ -6,3 +6,4 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=IDilettant_go-project-244&metric=coverage)](https://sonarcloud.io/summary/new_code?id=IDilettant_go-project-244)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=IDilettant_go-project-244&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=IDilettant_go-project-244)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=IDilettant_go-project-244&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=IDilettant_go-project-244)
+![Demo](assets/demo.gif)
