@@ -7,7 +7,7 @@ import (
 
 	"code/internal/diff"
 	"code/internal/domain"
-	formatters "code/internal/formatters/common"
+	"code/internal/formatters/common"
 )
 
 type Formatter struct{}
@@ -15,7 +15,7 @@ type Formatter struct{}
 func New() *Formatter { return &Formatter{} }
 
 const (
-	rootDepth  = 1
+	rootDepth  = 2
 	indentStep = 4
 
 	plainShift  = 2
@@ -24,12 +24,12 @@ const (
 
 func (f *Formatter) Format(changes []diff.Change) string {
 	var b strings.Builder
-	b.WriteString(formatters.OpeningBrace)
-	b.WriteString(formatters.NewLine)
+	b.WriteString(common.OpeningBrace)
+	b.WriteString(common.NewLine)
 
 	f.writeChanges(&b, changes, rootDepth)
 
-	b.WriteString(formatters.ClosingBrace)
+	b.WriteString(common.ClosingBrace)
 
 	return b.String()
 }
@@ -52,37 +52,37 @@ func (f *Formatter) writeChange(b *strings.Builder, ch diff.Change, depth int) {
 		f.writeLine(b, depth, "", ch.Key, ch.OldValue)
 
 	case diff.Removed:
-		f.writeLine(b, depth, formatters.SignRemoved, ch.Key, ch.OldValue)
+		f.writeLine(b, depth, common.SignRemoved, ch.Key, ch.OldValue)
 
 	case diff.Added:
-		f.writeLine(b, depth, formatters.SignAdded, ch.Key, ch.NewValue)
+		f.writeLine(b, depth, common.SignAdded, ch.Key, ch.NewValue)
 
 	case diff.Updated:
-		f.writeLine(b, depth, formatters.SignRemoved, ch.Key, ch.OldValue)
-		f.writeLine(b, depth, formatters.SignAdded, ch.Key, ch.NewValue)
+		f.writeLine(b, depth, common.SignRemoved, ch.Key, ch.OldValue)
+		f.writeLine(b, depth, common.SignAdded, ch.Key, ch.NewValue)
 	}
 }
 
 func (f *Formatter) writeNested(b *strings.Builder, ch diff.Change, depth int) {
 	b.WriteString(f.keyIndent(depth))
 	b.WriteString(ch.Key)
-	b.WriteString(formatters.ColonSpace)
-	b.WriteString(formatters.OpeningBrace)
-	b.WriteString(formatters.NewLine)
+	b.WriteString(common.ColonSpace)
+	b.WriteString(common.OpeningBrace)
+	b.WriteString(common.NewLine)
 
 	f.writeChanges(b, ch.Children, depth+1)
 
 	b.WriteString(f.keyIndent(depth))
-	b.WriteString(formatters.ClosingBrace)
-	b.WriteString(formatters.NewLine)
+	b.WriteString(common.ClosingBrace)
+	b.WriteString(common.NewLine)
 }
 
 func (f *Formatter) writeLine(b *strings.Builder, depth int, sign string, key string, value any) {
 	b.WriteString(f.linePrefix(depth, sign))
 	b.WriteString(key)
-	b.WriteString(formatters.ColonSpace)
+	b.WriteString(common.ColonSpace)
 	b.WriteString(f.renderValue(value, depth))
-	b.WriteString(formatters.NewLine)
+	b.WriteString(common.NewLine)
 }
 
 func (f *Formatter) linePrefix(depth int, sign string) string {
@@ -90,19 +90,19 @@ func (f *Formatter) linePrefix(depth int, sign string) string {
 		return f.keyIndent(depth)
 	}
 
-	base := strings.Repeat(formatters.Space, depth*indentStep-signedShift)
+	base := strings.Repeat(common.Space, depth*indentStep-signedShift)
 
-	return base + sign + formatters.Space
+	return base + sign + common.Space
 }
 
 func (f *Formatter) keyIndent(depth int) string {
-	return strings.Repeat(formatters.Space, depth*indentStep-plainShift)
+	return strings.Repeat(common.Space, depth*indentStep-plainShift)
 }
 
 func (f *Formatter) renderValue(v any, depth int) string {
 	switch x := v.(type) {
 	case nil:
-		return formatters.NullString
+		return common.NullString
 	case string:
 		return x
 	case bool:
@@ -123,25 +123,25 @@ func (f *Formatter) renderValue(v any, depth int) string {
 
 func (f *Formatter) renderNode(obj domain.Node, depth int) string {
 	if len(obj) == 0 {
-		return formatters.OpeningBrace + formatters.ClosingBrace
+		return common.OpeningBrace + common.ClosingBrace
 	}
 
 	next := depth + 1
 
 	var b strings.Builder
-	b.WriteString(formatters.OpeningBrace)
-	b.WriteString(formatters.NewLine)
+	b.WriteString(common.OpeningBrace)
+	b.WriteString(common.NewLine)
 
 	for _, k := range obj.KeysSorted() {
 		b.WriteString(f.keyIndent(next))
 		b.WriteString(k)
-		b.WriteString(formatters.ColonSpace)
+		b.WriteString(common.ColonSpace)
 		b.WriteString(f.renderValue(obj[k], next))
-		b.WriteString(formatters.NewLine)
+		b.WriteString(common.NewLine)
 	}
 
 	b.WriteString(f.keyIndent(depth))
-	b.WriteString(formatters.ClosingBrace)
+	b.WriteString(common.ClosingBrace)
 
 	return b.String()
 }
