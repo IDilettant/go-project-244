@@ -17,7 +17,10 @@ func New() *Formatter { return &Formatter{} }
 func (f *Formatter) Format(changes []diff.Change) (string, error) {
 	var b strings.Builder
 	f.writeChanges(&b, changes, "")
-	return b.String(), nil
+
+	output := strings.TrimSuffix(b.String(), common.NewLine)
+
+	return output, nil
 }
 
 func (f *Formatter) writeChanges(
@@ -115,4 +118,3 @@ func renderValue(v any) string {
 		return fmt.Sprintf("%v", x)
 	}
 }
-

@@ -30,9 +30,10 @@ func (f *Formatter) Format(changes []diff.Change) (string, error) {
 	f.writeChanges(&b, changes, rootDepth)
 
 	b.WriteString(common.ClosingBrace)
-	b.WriteString(common.NewLine)
 
-	return b.String(), nil
+	output := strings.TrimSuffix(b.String(), common.NewLine)
+
+	return output, nil
 }
 
 func (f *Formatter) writeChanges(b *strings.Builder, changes []diff.Change, depth int) {
