@@ -14,10 +14,10 @@ type Formatter struct{}
 
 func New() *Formatter { return &Formatter{} }
 
-func (f *Formatter) Format(changes []diff.Change) string {
+func (f *Formatter) Format(changes []diff.Change) (string, error) {
 	var b strings.Builder
 	f.writeChanges(&b, changes, "")
-	return b.String()
+	return b.String(), nil
 }
 
 func (f *Formatter) writeChanges(

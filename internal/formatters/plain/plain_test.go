@@ -69,7 +69,8 @@ func TestPlainFormatterIntegration(t *testing.T) {
 			changes := diff.Compare(left, right)
 
 			f := plain.New()
-			got := f.Format(changes)
+			got, err := f.Format(changes)
+			require.NoError(t, err)
 
 			require.Equal(t, want, got)
 		})
