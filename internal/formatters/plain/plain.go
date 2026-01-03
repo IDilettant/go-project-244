@@ -39,6 +39,7 @@ func (f *Formatter) writeChange(
 
 	if ch.IsContainer() {
 		f.writeChanges(b, ch.Children, path)
+
 		return
 	}
 
@@ -75,6 +76,7 @@ func joinPath(prefix, key string) string {
 	if prefix == "" {
 		return key
 	}
+
 	return prefix + common.Dot + key
 }
 
@@ -113,3 +115,4 @@ func renderValue(v any) string {
 		return fmt.Sprintf("%v", x)
 	}
 }
+
