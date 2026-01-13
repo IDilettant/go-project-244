@@ -46,7 +46,7 @@ func TestCompareSemantics(t *testing.T) {
 			want: []Change{
 				{
 					Key:  "common",
-					Type: Unchanged,
+					Type: Nested,
 					Children: []Change{
 						{Key: "added", Type: Added, OldValue: nil, NewValue: float64(10)},
 						{Key: "keepNull", Type: Unchanged, OldValue: nil, NewValue: nil},
@@ -85,7 +85,7 @@ func TestCompareSemantics(t *testing.T) {
 			want: []Change{
 				{
 					Key:  "common",
-					Type: Unchanged,
+					Type: Nested,
 					Children: []Change{
 						{
 							Key:      "nodeToValue",
@@ -123,11 +123,11 @@ func TestCompareSemantics(t *testing.T) {
 			want: []Change{
 				{
 					Key:  "root",
-					Type: Unchanged,
+					Type: Nested,
 					Children: []Change{
 						{
 							Key:  "child",
-							Type: Unchanged,
+							Type: Nested,
 							Children: []Change{
 								{
 									Key:      "a",
@@ -153,4 +153,3 @@ func TestCompareSemantics(t *testing.T) {
 		})
 	}
 }
-

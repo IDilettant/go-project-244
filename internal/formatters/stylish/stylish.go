@@ -43,13 +43,10 @@ func (f *Formatter) writeChanges(b *strings.Builder, changes []diff.Change, dept
 }
 
 func (f *Formatter) writeChange(b *strings.Builder, ch diff.Change, depth int) {
-	if ch.IsContainer() {
+	switch ch.Type {
+	case diff.Nested:
 		f.writeNested(b, ch, depth)
 
-		return
-	}
-
-	switch ch.Type {
 	case diff.Unchanged:
 		f.writeLine(b, depth, "", ch.Key, ch.OldValue)
 

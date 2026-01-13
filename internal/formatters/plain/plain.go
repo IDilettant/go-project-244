@@ -40,13 +40,9 @@ func (f *Formatter) writeChange(
 ) {
 	path := joinPath(prefix, ch.Key)
 
-	if ch.IsContainer() {
-		f.writeChanges(b, ch.Children, path)
-
-		return
-	}
-
 	switch ch.Type {
+	case diff.Nested:
+		f.writeChanges(b, ch.Children, path)
 
 	case diff.Added:
 		b.WriteString(common.Property)

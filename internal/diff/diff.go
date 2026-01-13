@@ -47,7 +47,7 @@ func buildChangeForKey(key string, leftNode, rightNode domain.Node) Change {
 	if isNodeLeft && isNodeRight {
 		return Change{
 			Key:      key,
-			Type:     Unchanged,
+			Type:     Nested,
 			Children: Compare(leftChild, rightChild),
 		}
 	}

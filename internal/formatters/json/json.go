@@ -45,13 +45,10 @@ func convertChangesToDTOMap(changes []diff.Change) map[string]changeDTO {
 func convertChangeToDTO(change diff.Change) changeDTO {
 	dto := changeDTO{Type: changeTypeToString(change)}
 
-	if change.IsContainer() {
+	switch change.Type {
+	case diff.Nested:
 		dto.Children = convertChangesToDTOMap(change.Children)
 
-		return dto
-	}
-
-	switch change.Type {
 	case diff.Unchanged, diff.Removed:
 		dto.OldValue = change.OldValue
 
@@ -67,11 +64,10 @@ func convertChangeToDTO(change diff.Change) changeDTO {
 }
 
 func changeTypeToString(change diff.Change) string {
-	if change.IsContainer() {
-		return changeTypeNested
-	}
-
 	switch change.Type {
+	case diff.Nested:
+		return changeTypeNested
+
 	case diff.Unchanged:
 		return changeTypeUnchanged
 

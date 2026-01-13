@@ -7,6 +7,7 @@ const (
 	Removed
 	Added
 	Updated
+	Nested
 )
 
 type Change struct {
